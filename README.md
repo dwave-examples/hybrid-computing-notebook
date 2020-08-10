@@ -20,7 +20,11 @@ for optimal performance.
 To enable notebook extensions:
 
 ```bash
-jupyter contrib nbextension install --user
+jupyter contrib nbextension install --sys-prefix
+jupyter nbextension enable toc2/main
+jupyter nbextension enable exercise/main
+jupyter nbextension enable exercise2/main
+jupyter nbextension enable python-markdown/main
 ```
 
 To run the notebook:
