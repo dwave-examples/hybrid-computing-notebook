@@ -114,10 +114,47 @@ class TestJupyterNotebook(unittest.TestCase):
         # Smoketest
         MAX_RUN_TIME = 100
 
+        def _check_energy(cell):
+            """Check energy<0."""
+            energy_str = re.findall(r'-\d+\.?\d+', cell["outputs"][0]["text"])
+            self.assertLess(float(energy_str[0]), 0)
+
         jn_file = os.path.join(jn_dir, '02-hybrid-computing-workflows.ipynb')
         nb, errors = robust_run_jn(jn_file, MAX_RUN_TIME, self.MAX_EMBEDDING_RETRIES)
 
         self.assertEqual(errors, [])
+
+        # Section Basic Workflows, subsection States, create initial state  
+        self.assertIn("problem", nb["cells"][6]["outputs"][0]["text"])
+
+        # Section Basic Workflows, subsection Runnables, run Identity
+        self.assertIn("True", nb["cells"][9]["outputs"][0]["text"])
+
+        # Section Basic Workflows, subsection Runnables, run Duplicate
+        self.assertIn("2", nb["cells"][11]["outputs"][0]["text"])
+
+        # Section Basic Workflows, subsection Runnables, Const for samples=None
+        self.assertIn("True", nb["cells"][14]["outputs"][0]["text"])
+
+        # Section Basic Workflows, subsection Runnables, default tabu
+        _check_energy(nb["cells"][16])
+
+        # Section Basic Workflows, subsection Runnables, tabu with long timeout
+        _check_energy(nb["cells"][19])
+
+        # Section Basic Workflows, subsection Runnables
+        self.assertIn("info", nb["cells"][22]["outputs"][0]["text"])
+
+        # Section Basic Workflows, subsection Branch, print_counters()
+        self.assertIn("TabuProblemSampler", nb["cells"][24]["outputs"][0]["text"])
+
+        # Section Basic Workflows, subsection Branch, tabu generates initial samples
+        _check_energy(nb["cells"][26])
+
+        # Section Basic Workflows, subsection Branch, tabu all-1s initial samples
+        _check_energy(nb["cells"][29])
+
+       # Section A Practical Example
 
     def test_jn3(self):
         # Smoketest
