@@ -28,26 +28,32 @@ def run_jn(jn, timeout):
     preprocessor.allow_errors = True    
     preprocessor.preprocess(notebook, {'metadata': {'path': os.path.dirname(jn)}})
 
+    return notebook
+
+def collect_jn_errors(nb):
+
     errors = []
-    for cell in notebook.cells:
+    for cell in nb.cells:
         if 'outputs' in cell:
             for output in cell['outputs']:
                 if output.output_type == 'error':
                     if output.evalue == 'no embedding found':
-                        return notebook, ["Embedding failed"]
+                        return ["Embedding failed"]
                     else:
                         errors.append(output)
 
-    return notebook, errors
+    return errors
 
 def robust_run_jn(jn, timeout, retries):
 
     run_num = 1
-    notebook, errors = run_jn(jn, timeout)
+    notebook = run_jn(jn, timeout)
+    errors = collect_jn_errors(notebook)
 
     while errors == ['Embedding failed'] and run_num < retries:
         run_num += 1
-        notebook, errors = run_jn(jn, timeout)
+        notebook = run_jn(jn, timeout)
+        errors = collect_jn_errors(notebook)
 
     return notebook, errors
 
@@ -109,7 +115,6 @@ class TestJupyterNotebook(unittest.TestCase):
         # Section Operational Utilities, print_counters()  
         self.assertIn("INFO", nb["cells"][37]["outputs"][0]["text"])
 
-
     def test_jn2(self):
         # Smoketest
         MAX_RUN_TIME = 100
@@ -154,7 +159,21 @@ class TestJupyterNotebook(unittest.TestCase):
         # Section Basic Workflows, subsection Branch, tabu all-1s initial samples
         _check_energy(nb["cells"][29])
 
-       # Section A Practical Example
+        # Section A Practical Example, initial energy
+        _check_energy(nb["cells"][31])
+ 
+        # Section Parallel Branches: Blocking, SIMO
+        self.assertIn("2", nb["cells"][33]["outputs"][0]["text"])
+
+        # Section Parallel Branches: Blocking, MIMO, problem versus subproblem
+        cell_output = re.findall(r'\d+', nb["cells"][35]["outputs"][0]["text"])
+        self.assertGreater(int(cell_output[0]), int(cell_output[1]))
+
+        # Section Parallel Branches: Blocking, MIMO, exercise with two-branch energies
+        cell_output_str = nb["cells"][38]["outputs"][0]["text"]
+        energies_str = re.findall(r'\[(.*?)\]', cell_output_str)[0].split(',')
+        self.assertLess(float(energies_str[0]), 0)
+        self.assertLess(float(energies_str[1]), 0)
 
     def test_jn3(self):
         # Smoketest
