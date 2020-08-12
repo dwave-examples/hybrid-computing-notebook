@@ -16,6 +16,7 @@ import os
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 import unittest
+import re
 
 def run_jn(jn, timeout):
     
@@ -60,6 +61,12 @@ class TestJupyterNotebook(unittest.TestCase):
         # Smoketest
         MAX_RUN_TIME = 200
 
+        def _check_set_energy(cell):
+            """Check set>0 and energy<0."""
+            cell_output = re.findall(r'[-+]?\d+\.?\d+', cell["outputs"][0]["text"])
+            self.assertGreater(float(cell_output[0]), 0)
+            self.assertLess(float(cell_output[1]), 0)
+
         jn_file = os.path.join(jn_dir, '01-hybrid-computing-getting-started.ipynb')
         nb, errors = robust_run_jn(jn_file, MAX_RUN_TIME, self.MAX_EMBEDDING_RETRIES)
 
@@ -68,6 +75,39 @@ class TestJupyterNotebook(unittest.TestCase):
         # Test cell outputs:
         # Section A Sample Problem, create a BQM
         self.assertIn("-1.0", nb["cells"][7]["outputs"][0]["text"])
+
+        # Section Using Leap's Hybrid Solvers, run default, print set size & energy 
+        _check_set_energy(nb["cells"][10])
+
+        # Section Sampler: Kerberos, run default, print set size & energy
+        _check_set_energy(nb["cells"][15]) 
+ 
+        # Section Sampler: Kerberos, max_iter=10, print set size & energy 
+        _check_set_energy(nb["cells"][17])
+
+        # Section Configuring the Sampler, exercise, return more sample sets 
+        cell_output_str = nb["cells"][20]["outputs"][0]["text"]
+        cell_output = list(map(float, re.findall(r'\[(.*?)\]', cell_output_str)[0].split()))
+        for energy in cell_output:
+            self.assertLess(energy, 0)
+
+        # Section Configuring the Sampler, advanced exercise, feature-based selection  
+        _check_set_energy(nb["cells"][23])
+
+        # Section Workflow: Parallel Tempering, default run, print set size & energy  
+        _check_set_energy(nb["cells"][26])
+
+        # Section Workflow: Parallel Tempering, configured parameters, print set size & energy  
+        _check_set_energy(nb["cells"][30])
+
+        # Section Operational Utilities, print_structure()  
+        self.assertIn("FixedTemperatureSampler", nb["cells"][33]["outputs"][0]["text"])
+
+        # Section Operational Utilities, print_counters()  
+        self.assertIn("FixedTemperatureSampler", nb["cells"][35]["outputs"][0]["text"])
+
+        # Section Operational Utilities, print_counters()  
+        self.assertIn("INFO", nb["cells"][37]["outputs"][0]["text"])
 
 
     def test_jn2(self):
