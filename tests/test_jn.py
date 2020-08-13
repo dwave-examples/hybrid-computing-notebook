@@ -37,10 +37,7 @@ def collect_jn_errors(nb):
         if 'outputs' in cell:
             for output in cell['outputs']:
                 if output.output_type == 'error':
-                    if output.evalue == 'no embedding found':
-                        return ["Embedding failed"]
-                    else:
-                        errors.append(output)
+                    errors.append(output)
 
     return errors
 
@@ -50,12 +47,15 @@ def robust_run_jn(jn, timeout, retries):
     notebook = run_jn(jn, timeout)
     errors = collect_jn_errors(notebook)
 
-    while errors == ['Embedding failed'] and run_num < retries:
+    while 'no embedding found' in errors and run_num < retries:
         run_num += 1
         notebook = run_jn(jn, timeout)
         errors = collect_jn_errors(notebook)
 
     return notebook, errors
+
+def cell_text(nb, cell):
+    return nb["cells"][cell]["outputs"][0]["text"]
 
 jn_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -79,8 +79,9 @@ class TestJupyterNotebook(unittest.TestCase):
         self.assertEqual(errors, [])
 
         # Test cell outputs:
+
         # Section A Sample Problem, create a BQM
-        self.assertIn("-1.0", nb["cells"][7]["outputs"][0]["text"])
+        self.assertIn("-1.0", cell_text(nb, 7))
 
         # Section Using Leap's Hybrid Solvers, run default, print set size & energy 
         _check_set_energy(nb["cells"][10])
@@ -92,7 +93,7 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_set_energy(nb["cells"][17])
 
         # Section Configuring the Sampler, exercise, return more sample sets 
-        cell_output_str = nb["cells"][20]["outputs"][0]["text"]
+        cell_output_str = cell_text(nb, 20)
         cell_output = list(map(float, re.findall(r'\[(.*?)\]', cell_output_str)[0].split()))
         for energy in cell_output:
             self.assertLess(energy, 0)
@@ -107,13 +108,13 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_set_energy(nb["cells"][30])
 
         # Section Operational Utilities, print_structure()  
-        self.assertIn("FixedTemperatureSampler", nb["cells"][33]["outputs"][0]["text"])
+        self.assertIn("FixedTemperatureSampler", cell_text(nb, 33))
 
         # Section Operational Utilities, print_counters()  
-        self.assertIn("FixedTemperatureSampler", nb["cells"][35]["outputs"][0]["text"])
+        self.assertIn("FixedTemperatureSampler", cell_text(nb, 35))
 
         # Section Operational Utilities, print_counters()  
-        self.assertIn("INFO", nb["cells"][37]["outputs"][0]["text"])
+        self.assertIn("INFO", cell_text(nb, 37))
 
     def test_jn2(self):
         # Smoketest
@@ -129,17 +130,19 @@ class TestJupyterNotebook(unittest.TestCase):
 
         self.assertEqual(errors, [])
 
+        # Test cell outputs:
+
         # Section Basic Workflows, subsection States, create initial state  
-        self.assertIn("problem", nb["cells"][6]["outputs"][0]["text"])
+        self.assertIn("problem", cell_text(nb, 6))
 
         # Section Basic Workflows, subsection Runnables, run Identity
-        self.assertIn("True", nb["cells"][9]["outputs"][0]["text"])
+        self.assertIn("True", cell_text(nb, 9))
 
         # Section Basic Workflows, subsection Runnables, run Duplicate
-        self.assertIn("2", nb["cells"][11]["outputs"][0]["text"])
+        self.assertIn("2", cell_text(nb, 11))
 
         # Section Basic Workflows, subsection Runnables, Const for samples=None
-        self.assertIn("True", nb["cells"][14]["outputs"][0]["text"])
+        self.assertIn("True", cell_text(nb, 14))
 
         # Section Basic Workflows, subsection Runnables, default tabu
         _check_energy(nb["cells"][16])
@@ -148,10 +151,10 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_energy(nb["cells"][19])
 
         # Section Basic Workflows, subsection Runnables
-        self.assertIn("info", nb["cells"][22]["outputs"][0]["text"])
+        self.assertIn("info", cell_text(nb, 22))
 
         # Section Basic Workflows, subsection Branch, print_counters()
-        self.assertIn("TabuProblemSampler", nb["cells"][24]["outputs"][0]["text"])
+        self.assertIn("TabuProblemSampler", cell_text(nb, 24))
 
         # Section Basic Workflows, subsection Branch, tabu generates initial samples
         _check_energy(nb["cells"][26])
@@ -163,20 +166,20 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_energy(nb["cells"][31])
  
         # Section Parallel Branches: Blocking, SIMO
-        self.assertIn("2", nb["cells"][33]["outputs"][0]["text"])
+        self.assertIn("2", cell_text(nb, 33))
 
         # Section Parallel Branches: Blocking, MIMO, problem versus subproblem
-        cell_output = re.findall(r'\d+', nb["cells"][35]["outputs"][0]["text"])
+        cell_output = re.findall(r'\d+', cell_text(nb, 35))
         self.assertGreater(int(cell_output[0]), int(cell_output[1]))
 
         # Section Parallel Branches: Blocking, MIMO, exercise with two-branch energies
-        cell_output_str = nb["cells"][38]["outputs"][0]["text"]
+        cell_output_str = cell_text(nb, 38)
         energies_str = re.findall(r'\[(.*?)\]', cell_output_str)[0].split(',')
         self.assertLess(float(energies_str[0]), 0)
         self.assertLess(float(energies_str[1]), 0)
 
         # Section Parallel Branches Non-Blocking, sample sets in two states 
-        cell_output_str = nb["cells"][40]["outputs"][0]["text"]
+        cell_output_str = cell_text(nb, 40)
         energies_str = re.findall(r'\d+', cell_output_str)
         self.assertGreater(int(energies_str[0]), 0)
         self.assertGreater(int(energies_str[1]), 0)
@@ -188,7 +191,7 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_energy(nb["cells"][44])
 
         # Section Customizing Sample Selection, lowest energy weighted by runtime
-        cell_output_str = nb["cells"][47]["outputs"][0]["text"]
+        cell_output_str = cell_text(nb, 47)
         energies_str = re.findall(r'-\d+', cell_output_str) 
         self.assertEqual(len(energies_str), 7)
 
@@ -196,15 +199,15 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_energy(nb["cells"][50])
 
         # Section Customizing Sample Selection, bonus exercise, test cell
-        cell_output_str = nb["cells"][51]["outputs"][0]["text"]
+        cell_output_str = cell_text(nb, 51)
         energies_str = re.findall(r'-\d+.\d+', cell_output_str) 
         self.assertEqual(len(energies_str), 9)
 
         # Section Iterating, print_counters()
-        self.assertIn("TabuProblemSampler", nb["cells"][53]["outputs"][0]["text"])
+        self.assertIn("TabuProblemSampler", cell_text(nb, 53))
 
         # Section Sample Workflows, Decomposition, Unwind with rolling_history 
-        cell_output_str = nb["cells"][70]["outputs"][0]["text"]
+        cell_output_str = cell_text(nb, 70)
         variables_str = re.findall(r'\d+', cell_output_str) 
         self.assertGreater(len(variables_str), 20)
 
@@ -215,10 +218,10 @@ class TestJupyterNotebook(unittest.TestCase):
         _check_energy(nb["cells"][75])
 
         # Section Experimenting with Auto-Embedding Vs Pre-Embedding, print_structure()
-        self.assertIn("SplatComposer", nb["cells"][80]["outputs"][0]["text"])
+        self.assertIn("SplatComposer", cell_text(nb, 80))
 
         # Section Experimenting with Auto-Embedding Vs Pre-Embedding, print_counters()
-        self.assertIn("QPUSubproblemAutoEmbeddingSampler", nb["cells"][82]["outputs"][0]["text"])
+        self.assertIn("QPUSubproblemAutoEmbeddingSampler", cell_text(nb, 82))
 
 
     def test_jn3(self):
@@ -229,4 +232,50 @@ class TestJupyterNotebook(unittest.TestCase):
         nb, errors = robust_run_jn(jn_file, MAX_RUN_TIME, self.MAX_EMBEDDING_RETRIES)
 
         self.assertEqual(errors, [])
- 
+
+        # Test cell outputs:
+
+        # Section Creating States, create a state from the example problem
+        self.assertIn("hybrid.core.SampleSet", cell_text(nb, 7))
+
+        # Section Creating States, max_sample used, read energy 
+        energy_str = re.findall(r'\d+.\d+', cell_text(nb, 9)) 
+        self.assertGreater(len(energy_str), 0)
+
+        # Section Updating States, updated() method
+        self.assertIn("Some information", cell_text(nb, 11))
+
+        # Section Updating States, updated() method plus dup()
+        self.assertIn("Some more information", cell_text(nb, 13))
+
+        # Section Resolving States
+        self.assertIn("state=running", cell_text(nb, 15))
+
+        # Section Resolving States, using result()
+        self.assertIn("Future", cell_text(nb, 17))
+
+        # Section Resolving States, Run Identity in a loop  
+        energy_str = re.findall(r'\d+.\d+', cell_text(nb, 19)) 
+        self.assertGreater(len(energy_str), 0)
+
+        # Section Executing Runnables, using error()
+        self.assertIn("int", cell_text(nb, 22))
+
+        # Section Executing Runnables, using next()  
+        energy_str = re.findall(r'\d+.\d+', cell_text(nb, 24)) 
+        self.assertGreater(len(energy_str), 0)
+
+        # Section Terminating Runnables, using stop()
+        self.assertIn("state=running", cell_text(nb, 27))
+
+        # Section Terminating Runnables, using stop()
+        self.assertIn("state=finished", cell_text(nb, 29))
+
+
+
+
+
+
+
+
+
