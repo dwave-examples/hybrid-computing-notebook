@@ -201,7 +201,7 @@ class TestJupyterNotebook(unittest.TestCase):
         # Section Customizing Sample Selection, bonus exercise, test cell
         cell_output_str = cell_text(nb, 51)
         energies_str = re.findall(r'-\d+.\d+', cell_output_str) 
-        self.assertEqual(len(energies_str), 9)
+        self.assertGreater(len(energies_str), 5)
 
         # Section Iterating, print_counters()
         self.assertIn("TabuProblemSampler", cell_text(nb, 53))
@@ -249,7 +249,7 @@ class TestJupyterNotebook(unittest.TestCase):
         self.assertIn("Some more information", cell_text(nb, 13))
 
         # Section Resolving States
-        self.assertIn("state=running", cell_text(nb, 15))
+        self.assertIn("state=", cell_text(nb, 15))
 
         # Section Resolving States, using result()
         self.assertIn("Future", cell_text(nb, 17))
@@ -266,16 +266,66 @@ class TestJupyterNotebook(unittest.TestCase):
         self.assertGreater(len(energy_str), 0)
 
         # Section Terminating Runnables, using stop()
-        self.assertIn("state=running", cell_text(nb, 27))
+        self.assertIn("state=", cell_text(nb, 27))
 
         # Section Terminating Runnables, using stop()
         self.assertIn("state=finished", cell_text(nb, 29))
 
+        # Section A Simple Runnable, counter after one execution
+        self.assertIn("1", cell_text(nb, 34))
+
+        # Section A Simple Runnable, Exercise, counter after one execution
+        self.assertIn("1", cell_text(nb, 38))
+
+        # Section Customizing Termination, run less than 10 sec 
+        counter_str = re.findall(r'\d+', cell_text(nb, 42))
+        self.assertGreater(int(counter_str[0]), 0)
+
+        # Section Customizing Termination, Loop implements @stoppable 
+        counter_str = re.findall(r'\d+', cell_text(nb, 44))
+        self.assertGreater(int(counter_str[0]), 0)
+
+        # Section Section Customizing Termination, halt() method
+        self.assertIn("Terminated", cell_text(nb, 47))
+
+        # Section Customizing Termination, exercise, halt() method 
+        counter_str = re.findall(r'\d+', cell_text(nb, 51))
+        self.assertGreater(int(counter_str[0]), 0)
+
+        # Section Example Trait: SISO, IncrementCount on a States-class object
+        self.assertIn("object has no attribute", cell_text(nb, 55))
+
+        # Section Example Trait: SISO, IncrementCount with the SISO trait
+        self.assertIn("single state required", cell_text(nb, 59))
+
+        # Section Example Trait: MIMO, exercise
+        self.assertIn("state sequence required", cell_text(nb, 65))
+
+        # Section Example: Existing Trait SamplesProcessor
+        self.assertIn("input state is missing", nb["cells"][70]["outputs"][1]["text"])
+
+        # Section Example: New Trait TraitCounterIntaking
+        self.assertIn("input state is missing", cell_text(nb, 73))
+
+        # Section A Custom Sampler, exercise output
+        filtered_nodes = re.findall(r'\[(.*?)\]', cell_text(nb, 78))[0].split()
+        self.assertGreater(len(filtered_nodes), 0)
+
+        # Section Dimod Conversion 
+        energy_str = re.findall(r'-\d+.\d+', cell_text(nb, 82)) 
+        self.assertLess(float(energy_str[0]), 0)
+
+        # Section Dimod Conversion, run the converted workflow 
+        energy_str = re.findall(r'-\d+.\d+', cell_text(nb, 86)) 
+        self.assertLess(float(energy_str[0]), 0)
+
+        # Section Dimod Conversion, specifying selected nodes in filter_nodes
+        filtered_nodes = re.findall(r'\[(.*?)\]', cell_text(nb, 90))[0].split()
+        self.assertGreater(len(filtered_nodes), 0)
 
 
-
-
-
-
+        # Section Dimod Conversion, converted TabuProblemSamplerFilteredNodes
+        filtered_nodes = re.findall(r'\[(.*?)\]', cell_text(nb, 94))[0].split()
+        self.assertGreater(len(filtered_nodes), 0)
 
 
