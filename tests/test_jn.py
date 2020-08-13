@@ -175,6 +175,52 @@ class TestJupyterNotebook(unittest.TestCase):
         self.assertLess(float(energies_str[0]), 0)
         self.assertLess(float(energies_str[1]), 0)
 
+        # Section Parallel Branches Non-Blocking, sample sets in two states 
+        cell_output_str = nb["cells"][40]["outputs"][0]["text"]
+        energies_str = re.findall(r'\d+', cell_output_str)
+        self.assertGreater(int(energies_str[0]), 0)
+        self.assertGreater(int(energies_str[1]), 0)
+
+        # Section Selecting Samples, lowest energy
+        _check_energy(nb["cells"][42])
+
+        # Section Customizing Sample Selection, default tabu search, lowest energy
+        _check_energy(nb["cells"][44])
+
+        # Section Customizing Sample Selection, lowest energy weighted by runtime
+        cell_output_str = nb["cells"][47]["outputs"][0]["text"]
+        energies_str = re.findall(r'-\d+', cell_output_str) 
+        self.assertEqual(len(energies_str), 7)
+
+        # Section Customizing Sample Selection, bonus exercise, lowest energy
+        _check_energy(nb["cells"][50])
+
+        # Section Customizing Sample Selection, bonus exercise, test cell
+        cell_output_str = nb["cells"][51]["outputs"][0]["text"]
+        energies_str = re.findall(r'-\d+.\d+', cell_output_str) 
+        self.assertEqual(len(energies_str), 9)
+
+        # Section Iterating, print_counters()
+        self.assertIn("TabuProblemSampler", nb["cells"][53]["outputs"][0]["text"])
+
+        # Section Sample Workflows, Decomposition, Unwind with rolling_history 
+        cell_output_str = nb["cells"][70]["outputs"][0]["text"]
+        variables_str = re.findall(r'\d+', cell_output_str) 
+        self.assertGreater(len(variables_str), 20)
+
+        # Section Sample Workflows, Postprocessing, num_reads=10, before pp  
+        _check_energy(nb["cells"][73])
+
+        # Section Sample Workflows, Postprocessing, num_reads=10, with pp  
+        _check_energy(nb["cells"][75])
+
+        # Section Experimenting with Auto-Embedding Vs Pre-Embedding, print_structure()
+        self.assertIn("SplatComposer", nb["cells"][80]["outputs"][0]["text"])
+
+        # Section Experimenting with Auto-Embedding Vs Pre-Embedding, print_counters()
+        self.assertIn("QPUSubproblemAutoEmbeddingSampler", nb["cells"][82]["outputs"][0]["text"])
+
+
     def test_jn3(self):
         # Smoketest
         MAX_RUN_TIME = 100
