@@ -41,13 +41,18 @@ def collect_jn_errors(nb):
 
     return errors
 
+def embedding_fail(error_list):
+    if error_list != [] and error_list[0].evalue == 'no embedding found':
+        return True
+    return False
+
 def robust_run_jn(jn, timeout, retries):
 
     run_num = 1
     notebook = run_jn(jn, timeout)
     errors = collect_jn_errors(notebook)
 
-    while 'no embedding found' in errors and run_num < retries:
+    while embedding_fail(errors) and run_num < retries:
         run_num += 1
         notebook = run_jn(jn, timeout)
         errors = collect_jn_errors(notebook)
