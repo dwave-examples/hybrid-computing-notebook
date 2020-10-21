@@ -68,7 +68,7 @@ class TestJupyterNotebook(unittest.TestCase):
 
     def test_jn1(self):
         # Smoketest
-        MAX_RUN_TIME = 200
+        MAX_RUN_TIME = 800
 
         def _check_set_energy(cell):
             """Check set>0 and energy<0."""
@@ -121,7 +121,7 @@ class TestJupyterNotebook(unittest.TestCase):
 
     def test_jn2(self):
         # Smoketest
-        MAX_RUN_TIME = 100
+        MAX_RUN_TIME = 800
 
         def _check_energy(cell):
             """Check energy<0."""
@@ -229,7 +229,7 @@ class TestJupyterNotebook(unittest.TestCase):
 
     def test_jn3(self):
         # Smoketest
-        MAX_RUN_TIME = 100
+        MAX_RUN_TIME = 800
 
         jn_file = os.path.join(jn_dir, '03-hybrid-computing-components.ipynb')
         nb, errors = robust_run_jn(jn_file, MAX_RUN_TIME, self.MAX_EMBEDDING_RETRIES)
