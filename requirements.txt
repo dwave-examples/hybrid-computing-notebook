@@ -6,3 +6,4 @@ autopep8
 matplotlib~=3.0
 
 nbformat
+nbconvert==5.6.1
