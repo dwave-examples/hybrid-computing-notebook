@@ -157,7 +157,7 @@ class TestJupyterNotebook(unittest.TestCase):
         self.assertIn("info", cell_text(nb, 22))
 
         # Section Basic Workflows, subsection Branch, print_counters()
-        self.assertIn("TabuProblemSampler", cell_text(nb, 24))
+        self.assertIn("Branch", cell_text(nb, 24))
 
         # Section Basic Workflows, subsection Branch, tabu generates initial samples
         _check_energy(nb["cells"][26])
@@ -207,7 +207,7 @@ class TestJupyterNotebook(unittest.TestCase):
         self.assertGreater(len(energies_str), 0)
 
         # Section Iterating, print_counters()
-        self.assertIn("TabuProblemSampler", cell_text(nb, 53))
+        self.assertIn("Loop", cell_text(nb, 53))
 
         # Section Sample Workflows, Decomposition, Unwind with rolling_history 
         cell_output_str = cell_text(nb, 70)
