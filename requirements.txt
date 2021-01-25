@@ -1,4 +1,4 @@
-dwave-ocean-sdk>=3.2.1
+dwave-ocean-sdk>=3.3.0
 
 jupyter
 jupyter_contrib_nbextensions
