@@ -11,24 +11,6 @@ workflows:
       - dwave/test-osx
       - dwave/test-win
 
-  # Run daily tests on latest python version
-  daily:
-    triggers:
-      - schedule:
-          cron: "0 1 * * *"
-          filters:
-            branches:
-              only:
-                - master
-                - main
-    jobs:
-      - dwave/test-linux-single-python:
-          python-version: "3.9.0"
-      - dwave/test-osx-single-python:
-          python-version: "3.9.0"
-      - dwave/test-win-single-python:
-          python-version: "3.9.0"
-
   # Run weekly tests on all python versions
   weekly:
     triggers:
