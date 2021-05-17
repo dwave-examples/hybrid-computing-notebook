@@ -66,6 +66,7 @@ class TestJupyterNotebook(unittest.TestCase):
 
     MAX_EMBEDDING_RETRIES = 3    
 
+    @unittest.skipIf(os.getenv('SKIP_INT_TESTS'), "Skipping integration test.")
     def test_jn1(self):
         # Smoketest
         MAX_RUN_TIME = 800
@@ -119,6 +120,7 @@ class TestJupyterNotebook(unittest.TestCase):
         # Section Operational Utilities, print_counters()  
         self.assertIn("INFO", cell_text(nb, 37))
 
+    @unittest.skipIf(os.getenv('SKIP_INT_TESTS'), "Skipping integration test.")
     def test_jn2(self):
         # Smoketest
         MAX_RUN_TIME = 800
@@ -226,7 +228,7 @@ class TestJupyterNotebook(unittest.TestCase):
         # Section Experimenting with Auto-Embedding Vs Pre-Embedding, print_counters()
         self.assertIn("QPUSubproblemAutoEmbeddingSampler", cell_text(nb, 82))
 
-
+    @unittest.skipIf(os.getenv('SKIP_INT_TESTS'), "Skipping integration test.")
     def test_jn3(self):
         # Smoketest
         MAX_RUN_TIME = 800
@@ -326,8 +328,6 @@ class TestJupyterNotebook(unittest.TestCase):
         filtered_nodes = re.findall(r'\[(.*?)\]', cell_text(nb, 90))[0].split()
         self.assertGreater(len(filtered_nodes), 0)
 
-
         # Section Dimod Conversion, converted TabuProblemSamplerFilteredNodes
         filtered_nodes = re.findall(r'\[(.*?)\]', cell_text(nb, 94))[0].split()
         self.assertGreater(len(filtered_nodes), 0)
-
