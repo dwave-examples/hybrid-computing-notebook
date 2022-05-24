@@ -5,8 +5,9 @@ create hybrid workflows, and develop custom hybrid components.
 
 * **Notebook 01** will start you off with Leap's cloud-based hybrid solvers and
   out-of-the-box dwave-hybrid samplers and workflows, and requires only familiarity
-  with the binary quadratic model (BQM) approach to formulating problems for
-  solution on quantum computers.
+  with the
+  [binary quadratic model](https://docs.ocean.dwavesys.com/en/stable/concepts/bqm.html)
+  (BQM) approach to formulating problems for solution on quantum computers.
 * **Notebook 02** shows how you create your own workflows using existing dwave-hybrid
   components.
 * **Notebook 03** is aimed at developers interested in developing their own hybrid
@@ -24,12 +25,12 @@ This [Medium Article](https://medium.com/d-wave/three-truths-and-the-advent-of-h
 provides an overview of, and motivation for, hybrid computing.
 
 D-Wave's [Leap quantum cloud service](https://cloud.dwavesys.com/leap) provides
-cloud-based hybrid solvers you can submit arbitrary BQMs to. These solvers, which
-implement state-of-the-art classical algorithms together with intelligent allocation
-of the quantum processing unit (QPU) to parts of the problem where it benefits most,
-are designed to accommodate even very large problems. Leap's solvers can relieve
-you of the burden of any current and future development and optimization of
-hybrid algorithms that best solve your problem.
+cloud-based hybrid solvers you can submit arbitrary quadratic models to. These
+solvers, which implement state-of-the-art classical algorithms together with
+intelligent allocation of the quantum processing unit (QPU) to parts of the
+problem where it benefits most, are designed to accommodate even very large
+problems. Leap's solvers can relieve you of the burden of any current and future
+development and optimization of hybrid algorithms that best solve your problem.
 
 [*dwave-hybrid*](https://docs.ocean.dwavesys.com/en/stable/docs_hybrid/sdk_index.html)
 provides you with a Python framework for building a variety of flexible hybrid
