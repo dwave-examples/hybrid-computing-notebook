@@ -1,3 +1,7 @@
+[![Linux/Mac/Windows build status](
+  https://circleci.com/gh/dwave-examples/hybrid-computing-notebook.svg?style=svg)](
+  https://circleci.com/gh/dwave-examples/hybrid-computing-notebook)
+
 # Hybrid Computing
 
 These notebooks demonstrate how you can apply hybrid solvers to your problem,
