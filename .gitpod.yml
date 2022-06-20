@@ -2,7 +2,9 @@ tasks:
   - name: Open jupyter notebook app in a new browser window
     command: |
       port=8888
-      gp await-port "$port" && gp-preview-external "$(gp url "$port")/notebooks/01-hybrid-computing-getting-started.ipynb"
+      gp await-port "$port"
+      gp-preview-external "$(gp url "$port")/notebooks/01-hybrid-computing-getting-started.ipynb"
+      exit
 
   - name: Run jupyter notebook server
     command: |
