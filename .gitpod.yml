@@ -1,12 +1,4 @@
 tasks:
-  - name: Open jupyter notebook app in a new browser window
+  - name: Run jupyter notebook
     command: |
-      port=8888
-      notebooks=(*.ipynb)
-      gp await-port "$port"
-      gp-preview-external "$(gp url "$port")/notebooks/${notebooks[0]}"
-      exit
-
-  - name: Run jupyter notebook server
-    command: |
-      jupyter notebook
+      jupyter notebook *.ipynb
